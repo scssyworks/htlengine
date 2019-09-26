@@ -25,7 +25,7 @@ module.exports = class Runtime {
     this._globals = {};
     this._templates = {};
     this._useDir = '.';
-    this._resourceDir = '.';
+    this._resourceDir = ['.'];
     this._dom = new HtmlDOMFactory();
   }
 
@@ -73,7 +73,13 @@ module.exports = class Runtime {
   }
 
   withResourceDirectory(dir) {
-    this._resourceDir = dir;
+    this._resourceDir = [dir];
+    return this;
+  }
+
+  withResourceDirectories(dir) {
+    if (Array.isArray(dir))
+      this._resourceDir = dir;
     return this;
   }
 
@@ -116,10 +122,16 @@ module.exports = class Runtime {
   }
 
   resource(uri) {
-    const resourcePath = path.resolve(this._resourceDir, uri);
-
     return new Promise((resolve, reject) => {
-      fs.readFile(resourcePath, 'utf8', (err, data) => {
+      let targetFilePath;
+      for (let resourceDir of this._resourceDir) {
+        const resourcePath = path.resolve(resourceDir, uri);
+        if (fs.existsSync(resourcePath)) {
+          targetFilePath = resourcePath;
+          break;
+        }
+      }
+      fs.readFile(targetFilePath, 'utf8', (err, data) => {
         if (err) {
           reject(err);
         } else {
