@@ -178,6 +178,7 @@ module.exports = class Compiler {
         // remove from command array
         const templatePath = path.resolve(baseDir, c.filename);
         // eslint-disable-next-line no-await-in-loop
+        console.log('Trying to read a file in: ', templatePath);
         const template = await fse.readFile(templatePath, 'utf-8');
         // eslint-disable-next-line no-await-in-loop
         const templateCommands = await this._parse(template, path.dirname(templatePath));
